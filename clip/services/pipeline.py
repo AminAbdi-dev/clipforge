@@ -132,11 +132,5 @@ def process_video(youtube_url):
         "success": True,
         "cached": bool(existing_video),
         "title": title,
-        "final_video": final_video.replace(
-            "media\\",
-            "/media/"
-        ).replace(
-            "\\",
-            "/"
-        ),
+        "final_video": final_video.split("media")[-1].replace("\\", "/"),
     }

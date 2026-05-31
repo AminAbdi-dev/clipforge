@@ -45,16 +45,16 @@ def detect_hooks(segments):
 
     for segment in segments:
 
-        score = calculate_score(segment["text"])
+        score = calculate_score(
+            segment["text"]
+        )
 
-        if score >= 20:
-
-            clips.append({
-                "start": round(segment["start"], 2),
-                "end": round(segment["end"], 2),
-                "text": segment["text"],
-                "viral_score": score,
-            })
+        clips.append({
+            "start": round(segment["start"], 2),
+            "end": round(segment["end"], 2),
+            "text": segment["text"],
+            "viral_score": score,
+        })
 
     clips = sorted(
         clips,

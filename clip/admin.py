@@ -1,3 +1,15 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import (
+    ProcessedVideo,
+    GeneratedShort
+)
+
+
+admin.site.register(
+    ProcessedVideo
+)
+
+admin.site.register(
+    GeneratedShort
+)

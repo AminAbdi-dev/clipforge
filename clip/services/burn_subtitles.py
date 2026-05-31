@@ -21,11 +21,13 @@ def burn_subtitles(video_path, subtitle_path, output_name="final_auto_clip.mp4")
 
     command = (
         f'ffmpeg -y -i "{video_path}" '
-        f'-vf subtitles=clip_subtitles.srt '
+        f'-vf "subtitles=clip_subtitles.srt:force_style=\'FontName=Arial,FontSize=16,Outline=3,Shadow=1,Alignment=2,MarginV=80\'" '
         f'"{output_path}"'
     )
 
     print("COMMAND:", command)
+
+    print(command)
 
     subprocess.run(
         command,

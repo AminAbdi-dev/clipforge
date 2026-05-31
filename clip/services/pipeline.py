@@ -2,6 +2,7 @@ import os
 import shutil
 import uuid
 
+from clip.services.ai_hook_detector import detect_hooks_ai
 from clip.services.youtube_utils import extract_video_id
 from clip.models import ProcessedVideo
 
@@ -13,7 +14,16 @@ from clip.services.clip_subtitles import generate_clip_srt
 from clip.services.burn_subtitles import burn_subtitles
 
 
-def process_video(youtube_url):
+from clip.models import (
+    ProcessedVideo,
+    GeneratedShort
+)
+
+def process_video(
+    youtube_url,
+    short_count=1,
+    user=None
+):
 
     video_id = extract_video_id(youtube_url)
 
@@ -23,9 +33,6 @@ def process_video(youtube_url):
         video_id=video_id
     ).first()
 
-    existing_video = ProcessedVideo.objects.filter(
-        video_id=video_id
-    ).first()
 
     # CACHE HIT
     if (
@@ -36,6 +43,7 @@ def process_video(youtube_url):
     ):
 
         print("USING CACHED VIDEO")
+        print("USING CACHED TRANSCRIPT")
 
         video_path = existing_video.video_path
 
@@ -82,9 +90,38 @@ def process_video(youtube_url):
         )
 
     # DETECT HOOKS
-    hooks = detect_hooks(
-        transcript_segments
-    )
+
+    try:
+
+        print("USING AI HOOK DETECTOR")
+
+        hooks = detect_hooks_ai(
+            transcript_segments
+        )
+
+        if not hooks:
+
+            print("AI RETURNED NO HOOKS")
+
+            hooks = detect_hooks(
+                transcript_segments
+            )
+
+    except Exception as e:
+
+        print("AI FAILED:", e)
+
+        print("USING REGEX FALLBACK")
+
+        hooks = detect_hooks(
+            transcript_segments
+        )
+
+    print("HOOKS FOUND:", len(hooks))
+    print(hooks)
+
+
+
 
     if not hooks:
         return {
@@ -92,45 +129,48 @@ def process_video(youtube_url):
             "message": "No hooks found"
         }
 
-    best_hook = hooks[0]
+    selected_hooks = hooks[:short_count]
 
-    # EXTRACT CLIP
-    clip_path = extract_clip(
-        video_path=video_path,
-        start=best_hook["start"],
-        end=best_hook["end"],
-        output_name=f"{uuid.uuid4()}.mp4"
-    )
+    final_videos = []
 
-    # GENERATE SUBTITLE
-    clip_srt = generate_clip_srt(
-        segments=transcript_segments,
-        clip_start=best_hook["start"],
-        clip_end=best_hook["end"],
-    )
+    for hook in selected_hooks:
 
-    shutil.copy(
-        clip_srt,
-        "media/clips/clip_subtitles.srt"
-    )
+        clip_path = extract_clip(
+            video_path=video_path,
+            start=hook["start"],
+            end=hook["end"],
+        )
 
-    print(
-        "COPIED EXISTS:",
-        os.path.exists(
+        clip_srt = generate_clip_srt(
+            segments=transcript_segments,
+            clip_start=hook["start"],
+            clip_end=hook["end"],
+        )
+
+        shutil.copy(
+            clip_srt,
             "media/clips/clip_subtitles.srt"
         )
-    )
 
-    # BURN SUBTITLE
-    final_video = burn_subtitles(
-        video_path=clip_path,
-        subtitle_path=clip_srt,
-        output_name=f"final_{uuid.uuid4()}.mp4"
-    )
+        final_video = burn_subtitles(
+            video_path=clip_path,
+            subtitle_path=clip_srt,
+            output_name=f"final_{uuid.uuid4()}.mp4"
+        )
 
+        final_videos.append(
+            final_video.split("media")[-1].replace("\\", "/")
+        )
+        GeneratedShort.objects.create(
+            user=user,
+            title=title,
+            youtube_url=youtube_url,
+            final_video=final_video,
+        )
     return {
         "success": True,
         "cached": bool(existing_video),
         "title": title,
-        "final_video": final_video.split("media")[-1].replace("\\", "/"),
-    }
+        "videos": final_videos,
+}
+

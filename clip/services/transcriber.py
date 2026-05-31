@@ -1,13 +1,48 @@
-import whisper
+import os
 
+from groq import Groq
+from dotenv import load_dotenv
 
-model = whisper.load_model("base")
+load_dotenv()
+
+client = Groq(
+    api_key=os.getenv(
+        "GROQ_API_KEY"
+    )
+)
 
 
 def transcribe_audio(audio_path: str):
-    result = model.transcribe(audio_path)
+
+    with open(
+        audio_path,
+        "rb"
+    ) as file:
+
+        transcription = (
+            client.audio.transcriptions.create(
+                file=file,
+                model="whisper-large-v3",
+                response_format="verbose_json",
+            )
+        )
+
+    segments = []
+
+    if hasattr(
+        transcription,
+        "segments"
+    ):
+
+        for segment in transcription.segments:
+
+            segments.append({
+                "start": segment.start,
+                "end": segment.end,
+                "text": segment.text,
+            })
 
     return {
-        "text": result["text"],
-        "segments": result["segments"],
+        "text": transcription.text,
+        "segments": segments,
     }

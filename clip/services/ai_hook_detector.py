@@ -15,7 +15,7 @@ load_dotenv()
 client = ChatCompletionsClient(
     endpoint="https://models.github.ai/inference",
     credential=AzureKeyCredential(
-        os.getenv("GITHUB_TOKEN")
+        print("TOKEN:", os.getenv("GITHUB_TOKEN"))
     ),
 )
 

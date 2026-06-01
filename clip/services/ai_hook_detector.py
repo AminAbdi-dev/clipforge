@@ -12,6 +12,8 @@ from azure.ai.inference.models import (
 
 load_dotenv()
 
+endpoint = "https://models.github.ai/inference"
+
 print("TOKEN:", os.getenv("GITHUB_TOKEN"))
 
 client = ChatCompletionsClient(

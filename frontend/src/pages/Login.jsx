@@ -45,7 +45,7 @@ export default function Login() {
         "username",
         username
       );
-
+      window.location.replace("/dashboard");
       navigate("/dashboard");
 
     } else {

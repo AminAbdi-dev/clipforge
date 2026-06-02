@@ -1,4 +1,4 @@
-
+import { useNavigate } from "react-router-dom";
 import {
   useState,
   useEffect,
@@ -25,7 +25,7 @@ function Dashboard() {
     "username"
   );
   const menuRef = useRef(null);
-
+  const navigate = useNavigate();
 
   const loadHistory = async () => {
 
@@ -46,7 +46,7 @@ if (response.status === 401) {
   localStorage.removeItem("token");
 
 
-  window.location.href = "/login";
+  navigate("/login");
 
   return;
 }
@@ -150,7 +150,7 @@ if (response.status === 401) {
 
     localStorage.removeItem("token");
 
-    window.location.href = "/login";
+    navigate("/login");
 
     return;
     }
@@ -202,8 +202,7 @@ const handleLogout = () => {
     "username"
   );
 
-  window.location.href =
-    "/login";
+  navigate("/login");
 };
 
 

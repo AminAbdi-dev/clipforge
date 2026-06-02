@@ -18,7 +18,6 @@ def download_video(youtube_url: str):
         "outtmpl": str(output_path),
         "quiet": False,
         "noplaylist": True,
-        "impersonate": "chrome",
 
         "extractor_args": {
             "youtube": {
@@ -27,11 +26,23 @@ def download_video(youtube_url: str):
                     "ios"
                 ]
             }
+        },
+
+        "http_headers": {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/137.0.0.0 Safari/537.36"
+            )
         }
     }
 
     with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(youtube_url, download=True)
+        try:
+            info = ydl.extract_info(youtube_url, download=True)
+        except Exception as e:
+            print("YTDLP ERROR:", str(e))
+            raise
 
     downloaded_file = MEDIA_ROOT / f"{unique_id}.mp4"
 

@@ -46,8 +46,7 @@ export default function Login() {
         username
       );
 
-      window.location.href =
-        "/dashboard";
+      navigate("/dashboard");
 
     } else {
 

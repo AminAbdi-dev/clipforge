@@ -53,6 +53,9 @@ def download_video(youtube_url: str):
                 base64.b64decode(cookies_b64)
             )
     
+    print("COOKIE ENV EXISTS:", bool(os.getenv("YOUTUBE_COOKIES_B64")))
+    print("COOKIE FILE EXISTS:", cookie_file.exists())
+    
     with YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(youtube_url, download=True)

@@ -34,14 +34,6 @@ def download_video(youtube_url: str):
         "noplaylist": True,
         "cookiefile": str(cookie_file),
 
-        "extractor_args": {
-            "youtube": {
-                "player_client": [
-                    "android",
-                    "ios"
-                ]
-            }
-        },
 
         "http_headers": {
             "User-Agent": (

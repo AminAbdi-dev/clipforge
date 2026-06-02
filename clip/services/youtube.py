@@ -16,16 +16,16 @@ def download_video(youtube_url: str):
     # Create cookie file from Railway env variable
     cookie_file = Path("/tmp/youtube_cookies.txt")
 
-    if not cookie_file.exists():
-        cookies_b64 = os.getenv("YOUTUBE_COOKIES_B64")
+    cookies_b64 = os.getenv("YOUTUBE_COOKIES_B64")
 
-        if cookies_b64:
-            cookie_file.write_bytes(
-                base64.b64decode(cookies_b64)
-            )
+    if cookies_b64:
+        cookie_file.write_bytes(
+            base64.b64decode(cookies_b64)
+        )
 
     print("COOKIE ENV EXISTS:", bool(os.getenv("YOUTUBE_COOKIES_B64")))
     print("COOKIE FILE EXISTS:", cookie_file.exists())
+    print("COOKIE SIZE:", cookie_file.stat().st_size)
 
     ydl_opts = {
         "format": "best[ext=mp4]/best",

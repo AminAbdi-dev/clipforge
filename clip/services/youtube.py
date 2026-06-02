@@ -14,10 +14,20 @@ def download_video(youtube_url: str):
     output_path = MEDIA_ROOT / f"{unique_id}.%(ext)s"
 
     ydl_opts = {
-        "format": "mp4",
+        "format": "best[ext=mp4]/best",
         "outtmpl": str(output_path),
         "quiet": False,
         "noplaylist": True,
+        "impersonate": "chrome",
+
+        "extractor_args": {
+            "youtube": {
+                "player_client": [
+                    "android",
+                    "ios"
+                ]
+            }
+        }
     }
 
     with YoutubeDL(ydl_opts) as ydl:

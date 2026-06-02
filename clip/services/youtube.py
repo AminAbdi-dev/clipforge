@@ -28,12 +28,14 @@ def download_video(youtube_url: str):
     print("COOKIE SIZE:", cookie_file.stat().st_size)
 
     ydl_opts = {
-        "format": "best[ext=mp4]/best",
+        "format": "bestvideo+bestaudio/best",
+        "merge_output_format": "mp4",
         "outtmpl": str(output_path),
         "quiet": False,
         "noplaylist": True,
         "cookiefile": str(cookie_file),
 
+        "source_address": "0.0.0.0",
 
         "http_headers": {
             "User-Agent": (
@@ -46,6 +48,7 @@ def download_video(youtube_url: str):
 
     with YoutubeDL(ydl_opts) as ydl:
         try:
+            print("YTDLP VERSION TEST")
             info = ydl.extract_info(youtube_url, download=True)
         except Exception as e:
             print("YTDLP ERROR:", str(e))

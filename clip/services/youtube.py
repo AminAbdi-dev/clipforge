@@ -4,6 +4,7 @@ import uuid
 import os
 import base64
 
+
 MEDIA_ROOT = Path("media")
 MEDIA_ROOT.mkdir(exist_ok=True)
 
@@ -11,21 +12,16 @@ MEDIA_ROOT.mkdir(exist_ok=True)
 def download_video(youtube_url: str):
 
     unique_id = str(uuid.uuid4())
+
     output_path = MEDIA_ROOT / f"{unique_id}.%(ext)s"
 
-    # Create cookie file from Railway env variable
-    cookie_file = Path("/tmp/youtube_cookies.txt")
+    cookie_file = Path("cookies/cookies.txt")
 
-    cookies_b64 = os.getenv("YOUTUBE_COOKIES_B64")
-
-    if cookies_b64:
-        cookie_file.write_bytes(
-            base64.b64decode(cookies_b64)
-        )
-
-    print("COOKIE ENV EXISTS:", bool(os.getenv("YOUTUBE_COOKIES_B64")))
     print("COOKIE FILE EXISTS:", cookie_file.exists())
-    print("COOKIE SIZE:", cookie_file.stat().st_size)
+
+    proxy_url = os.getenv("YOUTUBE_PROXY")
+
+    print("PROXY:", proxy_url)
 
     ydl_opts = {
         "format": "bestvideo+bestaudio/best",
@@ -35,7 +31,9 @@ def download_video(youtube_url: str):
         "noplaylist": True,
         "cookiefile": str(cookie_file),
 
-        "source_address": "0.0.0.0",
+        "socket_timeout": 60,
+
+        "retries": 10,
 
         "http_headers": {
             "User-Agent": (
@@ -46,13 +44,14 @@ def download_video(youtube_url: str):
         }
     }
 
+    if proxy_url:
+        ydl_opts["proxy"] = proxy_url
+
     with YoutubeDL(ydl_opts) as ydl:
-        try:
-            print("YTDLP VERSION TEST")
-            info = ydl.extract_info(youtube_url, download=True)
-        except Exception as e:
-            print("YTDLP ERROR:", str(e))
-            raise
+        info = ydl.extract_info(
+            youtube_url,
+            download=True
+        )
 
     downloaded_file = MEDIA_ROOT / f"{unique_id}.mp4"
 
